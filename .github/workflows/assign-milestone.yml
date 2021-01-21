@@ -1,0 +1,114 @@
+
+name: Assign Milestone
+
+on:
+  pull_request:
+    #types: [ready_for_review]
+    types: [edited]
+
+jobs:
+  assign-milestone:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Github Information
+      id: github-info
+      run: |
+        echo ::group::Repository:
+        echo ${{ github.repository }}
+        echo ::endgroup::
+        echo ::group::Pull Request:
+        echo Name: ${{ github.event.pull_request.title }}
+        echo Number: ${{ github.event.pull_request.number }}
+        echo ::endgroup::
+        # TEST ONLY - TO BE REMOVED
+        echo ::group::Testing Sandbox:
+        echo Current DateTime: $(date +'%Y-%m-%dT%H:%M:%SZ')
+        echo Current Date: $(date +'%Y-%m-%d')
+        if [[ $(date +'%Y-%m-%d') > $(date -d 2021-01-01 +'%Y-%m-%d') ]];
+        then
+          echo Current Date is greater than $(date -d 2021-01-01 +'%Y-%m-%d')
+        fi
+        if [[ $(date +'%Y-%m-%d') < $(date -d 2021-12-31 +'%Y-%m-%d') ]];
+        then
+          echo Current Date is less than $(date -d 2021-12-31 +'%Y-%m-%d')
+        fi
+        echo ::endgroup::
+
+    - name: Check for Linked Milestone
+      id: check-for-linked-milestone
+      run: |
+        MILESTONE_DATA=$( echo '${{ toJSON(github.event.pull_request.milestone) }}' )
+        echo ::group::Status:
+        # If there is no milestone linked to the pull request then a value of "null" is returned from the API
+        if [[ $MILESTONE_DATA == "null" ]];
+        then
+          echo Successfully found no linked milestone
+          echo ::set-output name=milestoneLinked::false
+        else
+          echo A milestone is already linked to the pull request
+          echo ::set-output name=milestoneLinked::true
+        fi
+        echo ::endgroup::
+
+    - name: Check for Open Milestones
+      id: check-for-milestones
+      if: steps.check-for-linked-milestone.outputs.milestoneLinked == 'false'
+      run: |
+        MILESTONE_DATA=$( curl --silent -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/milestones?state=open&sort=due_on&direction=asc )
+        MILESTONE_DATA=$( echo $MILESTONE_DATA | jq --raw-output '.[]' )
+        echo MILESTONE_DATA IS:
+        echo $MILESTONE_DATA
+        echo ::group::Status:
+        if [[ $MILESTONE_DATA == "" ]];
+        then
+          echo MILESTONE_DATA is empty
+        else
+          echo MILESTONE_DATA is not empty
+        fi
+        echo ::endgroup::
+
+    - name: Process Milestones
+      id: process-milestones
+      if: steps.check-for-milestones.outputs.milestones != null
+      run: |
+        # TODO
+        echo ::group::Status:
+        # TODO
+        echo ::endgroup::
+
+    - name: Create New Milestone
+      id: create-new-milestone
+      if: steps.process-milestones.outputs.milestone == null
+      run: |
+        # Need to authenticate to obtain write access for the REST API POST event
+        #DATA=$( curl --silent -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/milestones -d '{ "title":"Test", "state":"open", "description":"", "due_on":"2021-01-31T00:00:00Z" }' )
+        # TODO
+
+    - name: Assign Milestone
+      id: assign-milestone
+      if: steps.process-milestones.outputs.milestone != null || steps.create-new-milestone.outputs.milestone != null
+      run: |
+        if [[ steps.process-milestones.outputs.milestone != null ]];
+        then
+          echo process milestones
+        else if 
+        fi
+        if [[ steps.create-new-milestone.outputs
+        MILESTONE_DATA=$( echo '${{ steps.process-milestone.outputs.milestone }}' )
+        NUMBER=$( echo $MILESTONE_DATA | jq --raw-output '.number' )
+        TITLE=$( echo $MILESTONE_DATA | jq --raw-output '.title' )
+        OPEN_ISSUES=$( echo $MILESTONE_DATA | jq --raw-output '.open_issues' )
+        CLOSED_ISSUES=$( echo $MILESTONE_DATA | jq --raw-output '.closed_issues' )
+        DUE_ON=$( echo $MILESTONE_DATA | jq --raw-output '.due_on' )
+        # Need to authenticate to obtain write access for the REST API PATCH event
+        # Check $NUMBER variable assignment here in the -d flag payload...
+        #DATA=$( curl --silent -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }} -d '{ "milestone":"$NUMBER" }' )
+        echo $CLOSED_MILESTONE
+        echo ::group::Assigned Milestone:
+        echo Title: $TITLE
+        echo Number: $NUMBER
+        echo Open Issues: $OPEN_ISSUES
+        echo Closed Issues: $CLOSED_ISSUES
+        echo Due On: $DUE_ON
+        echo ::endgroup::
