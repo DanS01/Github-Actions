@@ -10,3 +10,5 @@ The table below contains the name of the Github Action and a short description o
 | Name            | Description                                                                                    |
 |:----------------|:-----------------------------------------------------------------------------------------------|
 | Close Milestone | Checks the open milestone linked to a pull request and closes it if its open issues count is 0 |
+
+Test
