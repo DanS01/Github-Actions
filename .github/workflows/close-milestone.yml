@@ -24,13 +24,8 @@ jobs:
     - name: Check for Open Milestone
       id: check-for-open-milestone
       run: |
-<<<<<<< HEAD
-        MILESTONE_DATA=$( echo '${{ github.event.pull_request.milestone }}' )
-        MILESTONE_STATE=$( echo $MILESTONE_DATA | jq --raw-output .state )
-=======
         MILESTONE_DATA=$( echo '${{ toJSON(github.event.pull_request.milestone) }}' )
-        MILESTONE_STATE=$( echo '${{ github.event.pull_request.milestone.state }}' )
->>>>>>> Implementation of Close Milestone action
+        MILESTONE_STATE=$( echo $MILESTONE_DATA | jq --raw-output .state )
         echo ::group::Status:
         # If there is no milestone linked to the pull request then a value of "null" is returned from the API
         if [[ $MILESTONE_DATA != "null" && $MILESTONE_STATE == "open" ]];
@@ -52,7 +47,7 @@ jobs:
         # If there are no open issues then the milestone is elegible for closure
         if [[ $OPEN_ISSUES == 0 ]];
         then
-          echo Milestone can successfully be closed
+          echo Milestone can be successfully closed
           echo ::set-output name=milestone::$PROCESSED_MILESTONE_DATA
         else
           # Only for the purpose of making the message grammatically correct when read
