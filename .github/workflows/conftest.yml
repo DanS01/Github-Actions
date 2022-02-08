@@ -1,0 +1,19 @@
+
+name: Conftest
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  conftest:
+    runs-on: ubuntu-latest
+    container: openpolicyagent/conftest:latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2.4.0
+      - name: Run Conftest Policy Checks
+        run: |
+          cd conftest
+          conftest test --output github src/dev/*.yaml
