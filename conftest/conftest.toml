@@ -1,0 +1,5 @@
+# The default policy folder is "policy"
+policy = "policies"
+
+# The default namespace is "main"
+namespace = "test"

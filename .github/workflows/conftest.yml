@@ -13,7 +13,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2.4.0
-      - name: Run Conftest Policy Checks
+      - name: Run Conftest Dev Policy Checks
         run: |
           cd conftest
-          conftest test --output github src/dev/*.yaml
+          conftest test --output github --policy ../conftest/policies/dev ../src/dev/*.yaml
+          conftest test --output github --policy ../conftest/policies/prod ../src/prod/*.yaml
+      - name: Run Conftest Prod Policy Checks
+        run: |
+          cd conftest
+          conftest test --output github --policy ../conftest/policies/prod --fail-on-warn ../src/prod/*.yaml
