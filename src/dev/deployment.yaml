@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-test-app
+  name: my-test-app
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-test-app
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: my-test-app
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+      - name: my-test-app-container
+        image: ghcr.io/my-repo/my-test-app:latest-dev
+        ports:
+          - containerPort: 18895
